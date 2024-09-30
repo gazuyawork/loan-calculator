@@ -5,7 +5,7 @@ import Decimal from 'decimal.js';
 
 const App: React.FC = () => {
   // 入力値の状態管理（セット1）
-  const [loanType1, setLoanType1] = useState<string>('新築・長期優良住宅・子育て世代');
+  const [loanType1, setLoanType1] = useState<string>(''); // デフォルトを未選択に
   const [borrowAmount1, setBorrowAmount1] = useState<number>(50000000);
   const [loanYears1, setLoanYears1] = useState<number>(35);
   const [interestRate1, setInterestRate1] = useState<number>(1);
@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [parkingFee1, setParkingFee1] = useState<number>(0);
 
   // 入力値の状態管理（セット2）
-  const [loanType2, setLoanType2] = useState<string>('新築・長期優良住宅・子育て世代');
+  const [loanType2, setLoanType2] = useState<string>(''); // デフォルトを未選択に
   const [borrowAmount2, setBorrowAmount2] = useState<number>(30000000);
   const [loanYears2, setLoanYears2] = useState<number>(25);
   const [interestRate2, setInterestRate2] = useState<number>(1.5);
@@ -52,7 +52,7 @@ const App: React.FC = () => {
     const selectedLoanType = loanTypes.find((type) => type.name === loanType);
     if (!selectedLoanType) return { totalDeduction: 0, yearlyData: [] };
 
-    const borrowingLimit = new Decimal(selectedLoanType.borrowingLimit);
+    const borrowingLimit = new Decimal(selectedLoanType.name === '新築・長期優良住宅・子育て世代' ? 50000000 : selectedLoanType.borrowingLimit); // 上限5000万円
     const deductionYears = selectedLoanType.deductionYears;
     const deductionRate = new Decimal(selectedLoanType.deductionRate);
 
@@ -105,11 +105,11 @@ const App: React.FC = () => {
 
     // セット1の計算
     const monthlyLoanPayment1 = calcLoanPayment(borrowAmount1, loanYears1, interestRate1);
-    setMonthlyPayment1(monthlyLoanPayment1.toNumber());
-    const totalLoanPayment1 = monthlyLoanPayment1.mul(loanYears1 * 12);
     const monthlyFees1 = new Decimal(managementFee1).plus(repairReserve1).plus(parkingFee1);
-    const totalPaymentAmount1 = monthlyLoanPayment1.plus(monthlyFees1).mul(loanYears1 * 12);
-    setTotalPayment1(totalPaymentAmount1.toNumber());
+    const totalMonthlyPayment1 = monthlyLoanPayment1.plus(monthlyFees1); // 管理費、修繕積立金、駐車場代を加算
+    setMonthlyPayment1(totalMonthlyPayment1.toNumber());
+    const totalLoanPayment1 = totalMonthlyPayment1.mul(loanYears1 * 12);
+    setTotalPayment1(totalLoanPayment1.toNumber());
 
     const { totalDeduction: totalDeduction1, yearlyData: yearlyBalances1 } = calculateTotalDeduction(
       borrowAmount1,
@@ -120,16 +120,16 @@ const App: React.FC = () => {
     setTotalDeduction1(totalDeduction1);
     setYearlyBalances1(yearlyBalances1);
 
-    const totalAfterDeduction1 = totalPaymentAmount1.minus(totalDeduction1);
+    const totalAfterDeduction1 = totalLoanPayment1.minus(totalDeduction1);
     setTotalPaymentAfterDeduction1(totalAfterDeduction1.toNumber());
 
     // セット2の計算
     const monthlyLoanPayment2 = calcLoanPayment(borrowAmount2, loanYears2, interestRate2);
-    setMonthlyPayment2(monthlyLoanPayment2.toNumber());
-    const totalLoanPayment2 = monthlyLoanPayment2.mul(loanYears2 * 12);
     const monthlyFees2 = new Decimal(managementFee2).plus(repairReserve2).plus(parkingFee2);
-    const totalPaymentAmount2 = monthlyLoanPayment2.plus(monthlyFees2).mul(loanYears2 * 12);
-    setTotalPayment2(totalPaymentAmount2.toNumber());
+    const totalMonthlyPayment2 = monthlyLoanPayment2.plus(monthlyFees2); // 管理費、修繕積立金、駐車場代を加算
+    setMonthlyPayment2(totalMonthlyPayment2.toNumber());
+    const totalLoanPayment2 = totalMonthlyPayment2.mul(loanYears2 * 12);
+    setTotalPayment2(totalLoanPayment2.toNumber());
 
     const { totalDeduction: totalDeduction2, yearlyData: yearlyBalances2 } = calculateTotalDeduction(
       borrowAmount2,
@@ -140,12 +140,12 @@ const App: React.FC = () => {
     setTotalDeduction2(totalDeduction2);
     setYearlyBalances2(yearlyBalances2);
 
-    const totalAfterDeduction2 = totalPaymentAmount2.minus(totalDeduction2);
+    const totalAfterDeduction2 = totalLoanPayment2.minus(totalDeduction2);
     setTotalPaymentAfterDeduction2(totalAfterDeduction2.toNumber());
 
     // 差額の計算
-    setMonthlyDifference(monthlyLoanPayment1.minus(monthlyLoanPayment2).toNumber());
-    setTotalDifference(totalPaymentAmount1.minus(totalPaymentAmount2).toNumber());
+    setMonthlyDifference(totalMonthlyPayment1.minus(totalMonthlyPayment2).toNumber());
+    setTotalDifference(totalLoanPayment1.minus(totalLoanPayment2).toNumber());
     setDeductionDifference(totalDeduction1 - totalDeduction2);
     setTotalAfterDeductionDifference(totalAfterDeduction1.minus(totalAfterDeduction2).toNumber());
   }, [
@@ -189,6 +189,7 @@ const App: React.FC = () => {
         <div className="column">
           <div className="input-row">
             <select value={loanType1} onChange={(e) => setLoanType1(e.target.value)}>
+              <option value="">未選択</option>
               {loanTypes.map((type) => (
                 <option key={type.name} value={type.name}>{type.name}</option>
               ))}
@@ -229,6 +230,7 @@ const App: React.FC = () => {
         <div className="column">
           <div className="input-row">
             <select value={loanType2} onChange={(e) => setLoanType2(e.target.value)}>
+              <option value="">未選択</option>
               {loanTypes.map((type) => (
                 <option key={type.name} value={type.name}>{type.name}</option>
               ))}
@@ -272,7 +274,8 @@ const App: React.FC = () => {
           <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>
           <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>
           <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>
-          <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>          <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>
+          <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>
+          <div className="input-row"><input type="number" style={{ display: 'none' }} /></div>
 
           <div className="result-row"><span className="difference">{Math.round(monthlyDifference).toLocaleString()}円</span></div>
           <div className="result-row"><span className="difference">{Math.round(totalDifference).toLocaleString()}円</span></div>
@@ -280,34 +283,6 @@ const App: React.FC = () => {
           <div className="result-row"><span className="difference">{Math.round(totalAfterDeductionDifference).toLocaleString()}円</span></div>
         </div>
       </div>
-
-      {/* 年末残高の推移表示 */}
-      {/* <h2>年末残高の推移</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>年度</th>
-            <th>セット1 年末残高（円）</th>
-            <th>セット1 控除額（円）</th>
-            <th>セット2 年末残高（円）</th>
-            <th>セット2 控除額（円）</th>
-          </tr>
-        </thead>
-        <tbody>
-          {yearlyBalances1.map((data1, index) => {
-            const data2 = yearlyBalances2[index] || { year: '', balance: 0, deduction: 0 };
-            return (
-              <tr key={data1.year}>
-                <td>{data1.year}</td>
-                <td>{Math.round(data1.balance).toLocaleString()}</td>
-                <td>{Math.round(data1.deduction).toLocaleString()}</td>
-                <td>{Math.round(data2.balance).toLocaleString()}</td>
-                <td>{Math.round(data2.deduction).toLocaleString()}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table> */}
     </div>
   );
 };
