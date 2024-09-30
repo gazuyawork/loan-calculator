@@ -1,32 +1,44 @@
-/* App.css */
 .container {
-  max-width: 600px;
+  max-width: 1200px; /* 全体の幅を広げる */
   margin: 0 auto;
   padding: 20px;
 }
 
-.input-row,
-.result-row {
+.row {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.column {
+  flex: 1;
+  padding: 0 10px;
+}
+
+.input-row, .result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 各項目を縦方向で中央揃え */
   margin-bottom: 15px;
 }
 
 label {
   flex: 1;
   font-weight: bold;
+  text-align: left;
 }
 
-input,
-select {
-  flex: 2;
+input, select {
+  width: 100%; /* フィールドの幅を調整 */
   padding: 5px;
+  box-sizing: border-box;
 }
 
 span {
-  flex: 2;
+  width: 100%;
   padding: 5px;
   background-color: #f0f0f0;
+  text-align: right; /* 差額や結果を右揃え */
 }
 
 h1 {
@@ -34,26 +46,31 @@ h1 {
   margin-bottom: 30px;
 }
 
-/* 既存のスタイルはそのまま */
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+.result-row span, .input-row input, .input-row select {
+  height: 30px; /* 高さを統一して揃える */
 }
 
-table th,
-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
+.result-row, .input-row {
+  height: 50px; /* 各行の高さを統一 */
+}
+
+.result-row span {
+  display: flex;
+  align-items: center; /* テキストを中央に */
+  justify-content: center;
+}
+
+input, select {
+  display: inline-block;
+  vertical-align: middle;
   text-align: right;
 }
 
-table th {
-  background-color: #f9f9f9;
-}
-
-table td:first-child,
-table th:first-child {
-  text-align: center;
+.difference {
+  background-color: #dff0d8;
+  color: #3c763d;
+  font-weight: bold;
+  text-align: right;
+  padding: 5px;
+  border-radius: 4px;
 }
